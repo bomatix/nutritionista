@@ -1,26 +1,43 @@
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { View, Text, TextInput, FlatList, StyleSheet } from 'react-native'
-import { BORDER_RADIUS, COLOR_BACKGROUND_PRIMARY, LARGE_PADDING, MEDIUM_PADDING, SMALL_PADDING, TEXT_FONT_SIZE } from '../../utils/Consts'
+import { FoodComponent } from '../../models/FoodComponent'
+import { Color, Container, FontSize, Padding } from '../../utils/Consts'
 import { GSTYLE_SCREEN_CONTAINER } from '../../utils/GlobalStyles'
 
 const AllFoodComponents = () => {
+
+    const [foodComponents, setFoodComponents] = useState<FoodComponent[]>([]);
+
+    const loadData = useCallback(async () => {
+        setFoodComponents(await FoodComponent.getAll());
+        console.log(foodComponents);
+    }, []);
+
+    useEffect(() => {
+        loadData();
+    }, [foodComponents]);
+
     return (
         <View style = {GSTYLE_SCREEN_CONTAINER}>
             <TextInput 
                 style = {styles.searchBar}
                 placeholder = 'Search...'/>
             {/* <FlatList/> */}
+            {foodComponents.map(item => (
+                <Text
+                    style={{paddingVertical: 10}}>{item.name}</Text>
+            ))}
         </View>
     )
 }   
 
 const styles = StyleSheet.create({
     searchBar: {
-        fontSize: TEXT_FONT_SIZE,
-        paddingHorizontal: SMALL_PADDING,
-        paddingVertical: MEDIUM_PADDING,
-        backgroundColor: COLOR_BACKGROUND_PRIMARY,
-        borderRadius: BORDER_RADIUS
+        fontSize: FontSize.TEXT,
+        paddingHorizontal: Padding.SMALL,
+        paddingVertical: Padding.MEDIUM,
+        backgroundColor: Color.BACKGROUND_PRIMARY,
+        borderRadius: Container.BORDER_RADIUS
     }
 })
 

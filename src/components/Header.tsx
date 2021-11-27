@@ -1,7 +1,10 @@
+import { ParamListBase, useNavigation } from '@react-navigation/core'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import React from 'react'
 import { Button, StyleSheet, Text, View } from 'react-native'
+import ContextMenu from 'react-native-context-menu-view'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { SMALL_PADDING } from '../utils/Consts'
+import { Padding } from '../utils/Consts'
 
 /**
  * This is a reusable component that can be used for
@@ -9,10 +12,10 @@ import { SMALL_PADDING } from '../utils/Consts'
  * @returns 
  */
 const Header = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
     return (
         <SafeAreaView style={styles.headerContainer}>
-            <Button onPress = {()=>{}} title = 'Add'/>
-            <Button onPress = {()=>{}} title = 'Add'/>
+            <Button onPress = {()=>{navigation.navigate('AddFood')}} title = 'Add food'/>
         </SafeAreaView>
     )
 }
@@ -23,7 +26,7 @@ const styles = StyleSheet.create({
     headerContainer: {
         backgroundColor: 'white',
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: SMALL_PADDING
+        justifyContent: 'flex-end',
+        paddingHorizontal: Padding.SMALL
     },
 })
