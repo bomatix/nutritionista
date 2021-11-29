@@ -16,6 +16,7 @@ import { Button, Text } from 'react-native';
 import Header from './src/components/Header';
 import Home from './src/Home';
 import { FoodComponent } from './src/models/FoodComponent';
+import { NutritionData } from './src/models/NutritionData';
 import AddFood from './src/screens/FoodComponents/AddFood';
 import AddMeal from './src/screens/FoodComponents/AddMeal';
 import AllFoodComponents from './src/screens/FoodComponents/AllFoodComponents';
@@ -46,9 +47,10 @@ const FoodComponentsNavigator = () => {
 
 const App = () => {
 
-  const loadDataCallback = useCallback(async () => {
+  const initializeDatabase = useCallback(async () => {
     try {
       await FoodComponent.createTable();
+      await NutritionData.createTable();
       console.log('created table')
     } catch (error) {
       console.error(error);
@@ -56,8 +58,8 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    loadDataCallback();
-  }, [loadDataCallback]);
+    initializeDatabase();
+  }, [initializeDatabase]);
 
   return (
       <NavigationContainer>

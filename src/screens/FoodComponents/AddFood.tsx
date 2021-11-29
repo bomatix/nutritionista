@@ -10,7 +10,7 @@ const AddFood = () => {
     const addFood = async () => {
         // TODO: handle promises
         // TODO: add checks
-        const foodComponent = new FoodComponent(foodName);
+        const foodComponent = FoodComponent.create(foodName);
         await FoodComponent.insert(foodComponent);
     }
 
