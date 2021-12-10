@@ -2,6 +2,14 @@
 export class Color {
     static BACKGROUND_PRIMARY = '#DDD'
     static BACKGROUND_SECONDARY = '#EEE'
+
+    static CONTAINER_PRIMARY = '#b2f2da'
+    static CONTAINER_SECONDARY = '#56a490'
+    static ACCENT_PRIMARY = '#fba33dFF'
+    static ACCENT_SECONDARY = '#f07d25'
+
+    static TEXT_CONTAINER_PRIMARY = 'white'
+    static TEXT_CONTAINER_SECONDARY = 'white'
 }
 
 // FONT_SIZES

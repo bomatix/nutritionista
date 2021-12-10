@@ -24,7 +24,7 @@ export default Header
 
 const styles = StyleSheet.create({
     headerContainer: {
-        backgroundColor: 'white',
+        backgroundColor: '#56a490',
         flexDirection: 'row',
         justifyContent: 'flex-end',
         paddingHorizontal: Padding.SMALL

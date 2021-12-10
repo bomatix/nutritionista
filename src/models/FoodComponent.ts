@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from "react-native-sqlite-storage";
 import { DatabaseService } from "../utils/DatabaseService";
-import { FoodComponentDBRow, FoodComponentWithoutNutritionDataDBRow } from "./DatabaseInterfaces";
-import { NutritionData } from "./NutritionData";
+import { FoodComponentDBRow } from "./DatabaseInterfaces";
+import { Quantity } from "./Quantity";
 
 /**
  * Model for food components that represents two types
@@ -13,50 +13,56 @@ import { NutritionData } from "./NutritionData";
  */
 export class FoodComponent {
 
-    // STATIC CLASS FIELDS
+    // STATIC FIELDS
 
     static tableName: string = 'food_component';
 
-    // CLASS FIELDS
+    // FIELDS
 
     id?: number;
 
     name?: string;
     
-    isComplex?: boolean;
+    kcal?: number;
+    
+    carbs?: number;
+    
+    protein?: number;
+    
+    fat?: number;
 
-    nutritionData?: NutritionData;
+    isComplex?: boolean = false;
+
+    areMacronutrientsCalculated?: boolean = true;
+
+    quantities?: Quantity[];
+
+    ingredients?: FoodComponent[];
 
     /**
      * Constructor.
      */
-    private constructor() { }
+    constructor() { }
 
-    // GETTER & SETTER
+    /**
+     * 
+     * @returns 
+     */
+    getQuantities(): Quantity[] {
+        if(this.quantities == undefined) {
+            Quantity.getByFoodComponentId(this.id!);
+        }
 
-    public getNutritionData(): NutritionData {
-        return this.nutritionData!;
+        return this.quantities!;
     }
 
-    public setNutritionData(nutritionData: NutritionData) {
-        this.nutritionData = nutritionData;
+    getIngredients(): FoodComponent[] {
+        if(!this.isComplex) throw new Error('This food component is not a meal!');
+        // TODO: Add fetching of ingredients
+        return [];
     }
 
     // FACTORY METHODS
-
-    /**
-     * Creates a FoodComponent object from a row read from database
-     * without nutrition data.
-     * @param rowData Data read from the database row.
-     * @returns An object of a FoodComponent class.
-     */
-    static createFromDBRowWithoutNutritionData(rowData: FoodComponentWithoutNutritionDataDBRow): FoodComponent {
-        let foodComponent = new FoodComponent();
-        foodComponent.id = rowData.id;
-        foodComponent.name = rowData.name;
-        foodComponent.isComplex = rowData.is_complex;
-        return foodComponent;
-    }
 
     /**
      * Creates a FoodComponent object from a row read from database
@@ -68,21 +74,22 @@ export class FoodComponent {
         let foodComponent = new FoodComponent();
         foodComponent.id = rowData.id;
         foodComponent.name = rowData.name;
+        foodComponent.kcal = rowData.kcal;
+        foodComponent.carbs = rowData.carbs;
+        foodComponent.protein = rowData.protein;
+        foodComponent.fat = rowData.fat;
         foodComponent.isComplex = rowData.is_complex;
-        const nutritionData = NutritionData.createFromDBRow(rowData);
-        foodComponent.nutritionData = nutritionData;
+        foodComponent.areMacronutrientsCalculated = rowData.are_macronutrients_calculated;
         return foodComponent;
     }
 
     /**
-     * 
+     * Empty constructor.
      * @param name 
      * @param isComplex 
      */
-    static create(name: string, isComplex: boolean = false): FoodComponent {
+    static create(): FoodComponent {
         let foodComponent = new FoodComponent();
-        foodComponent.name = name;
-        foodComponent.isComplex = isComplex;
         return foodComponent;
     }  
 
@@ -95,7 +102,27 @@ export class FoodComponent {
         const query = `CREATE TABLE IF NOT EXISTS ${FoodComponent.tableName}(
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
-            is_complex INTEGER DEFAULT 0
+            kcal DOUBLE,
+            carbs DOUBLE,
+            protein DOUBLE,
+            fat DOUBLE,
+            is_complex INTEGER DEFAULT 0,
+            are_macronutrients_calculated INTEGER DEFAULT 1
+        );`;
+        DatabaseService.executeDDLQuery(query);
+        console.log(query);
+    }
+
+    /**
+     * 
+     */
+    static async createIngredientsTable(): Promise<void> {
+        const query = `CREATE TABLE IF NOT EXISTS ingredient(
+            meal_id INTEGER,
+            ingredient_id INTEGER,
+            FOREIGN KEY (meal_id) REFERENCES food_component(id),
+            FOREIGN KEY (ingredient_id) REFERENCES food_component(id),
+            PRIMARY KEY (meal_id, ingredient_id)
         );`;
         DatabaseService.executeDDLQuery(query);
         console.log(query);
@@ -107,19 +134,21 @@ export class FoodComponent {
      */
     static async insert(foodComponent: FoodComponent): Promise<void> {
         try {
+            console.log(JSON.stringify(foodComponent));
+            if(foodComponent.areFieldsUndefined()) throw new Error('Some of the fields are undefined.');
             const query = `INSERT INTO ${FoodComponent.tableName} VALUES(
                 NULL,
                 '${foodComponent.name}',
-                ${foodComponent.isComplex}
+                ${foodComponent.kcal},
+                ${foodComponent.carbs},
+                ${foodComponent.protein},
+                ${foodComponent.fat},
+                ${foodComponent.isComplex},
+                ${foodComponent.areMacronutrientsCalculated}
             );`;
             // TODO: get inserted id.
             DatabaseService.executeDDLQuery(query);
             console.log(query)
-
-            if(foodComponent.nutritionData) {
-                // TODO: change id when you recieve it.
-                NutritionData.insert(foodComponent.nutritionData, 1);
-            }
         }
         catch(error) {
             console.log(error)
@@ -128,33 +157,26 @@ export class FoodComponent {
 
     /**
      * 
-     * @returns 
-     */
-    private static async getAllWithNutritionData(): Promise<FoodComponent[]> {
-        const db = await DatabaseService.getDBConnection();
-        // TODO: add nutrition data to query
-        const query = `SELECT * FROM ${FoodComponent.tableName}`;
-        const results = await db.executeSql(query);
-        const data = DatabaseService.readRows<FoodComponentWithoutNutritionDataDBRow>(results);
-        return data.map(item => FoodComponent.createFromDBRowWithoutNutritionData(item));
-    }
-
-    /**
-     * 
      * @param includeNutritionData 
      * @returns 
      */
-    static async getAll(includeNutritionData: boolean = true): Promise<FoodComponent[]> {
-        if(includeNutritionData) {
-            const db = await DatabaseService.getDBConnection();
-            const query = `SELECT * FROM ${FoodComponent.tableName} fc 
-                            LEFT JOIN ${NutritionData.tableName} nd ON fc.id = nd.food_component_id`;
-            const results = await db.executeSql(query);
-            const data = DatabaseService.readRows<FoodComponentDBRow>(results);
-            return data.map(item => FoodComponent.createFromDBRow(item));
-        }
-        else {
-            return FoodComponent.getAllWithNutritionData();
-        }
+    static async getAll(): Promise<FoodComponent[]> {
+        const db = await DatabaseService.getDBConnection();
+        const query = `SELECT * FROM ${FoodComponent.tableName}`;
+        const results = await db.executeSql(query);
+        const data = DatabaseService.readRows<FoodComponentDBRow>(results);
+        return data.map(item => FoodComponent.createFromDBRow(item));
+    }
+
+    // UTILS
+
+    areFieldsUndefined(): boolean {
+        if (this.name == undefined ||
+            this.kcal == undefined ||
+            this.carbs == undefined ||
+            this.protein == undefined ||
+            this.fat == undefined)
+            return true;
+        return false;
     }
 }

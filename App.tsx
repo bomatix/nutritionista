@@ -9,21 +9,31 @@
  */
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect } from 'react';
 import { Button, Text } from 'react-native';
+import { RecoilRoot } from 'recoil';
 import Header from './src/components/Header';
 import Home from './src/Home';
 import { FoodComponent } from './src/models/FoodComponent';
-import { NutritionData } from './src/models/NutritionData';
+import { Quantity } from './src/models/Quantity';
 import AddFood from './src/screens/FoodComponents/AddFood';
 import AddMeal from './src/screens/FoodComponents/AddMeal';
 import AllFoodComponents from './src/screens/FoodComponents/AllFoodComponents';
+import SelectFoodComponentsList from './src/screens/FoodComponents/SelectFoodComponentsList';
 
 const Tab = createBottomTabNavigator()
 
 const FoodComponentsStack = createNativeStackNavigator()
+
+const navTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: '#b2f2da',
+  },
+};
 
 const FoodComponentsNavigator = () => {
   return (
@@ -41,6 +51,9 @@ const FoodComponentsNavigator = () => {
       <FoodComponentsStack.Screen
         name = 'AddMeal'
         component = {AddMeal} />
+      <FoodComponentsStack.Screen
+        name = 'SelectIngredients'
+        component = { SelectFoodComponentsList } />
     </FoodComponentsStack.Navigator>
   )
 }
@@ -50,8 +63,7 @@ const App = () => {
   const initializeDatabase = useCallback(async () => {
     try {
       await FoodComponent.createTable();
-      await NutritionData.createTable();
-      console.log('created table')
+      await Quantity.createTable();
     } catch (error) {
       console.error(error);
     }
@@ -62,7 +74,8 @@ const App = () => {
   }, [initializeDatabase]);
 
   return (
-      <NavigationContainer>
+    <RecoilRoot>
+      <NavigationContainer theme={navTheme}>
         <Tab.Navigator>
           <Tab.Screen 
             name = 'Home' 
@@ -76,6 +89,7 @@ const App = () => {
             }}/>
         </Tab.Navigator>
       </NavigationContainer>
+    </RecoilRoot>
   );
 };
 

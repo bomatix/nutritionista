@@ -1,0 +1,11 @@
+/* CSV */
+b2f2da,56a490,fba33d,f07d25
+
+/* Array */
+["b2f2da","56a490","fba33d","f07d25"]
+
+/* Object */
+{"Magic Mint":"b2f2da","Polished Pine":"56a490","Deep Saffron":"fba33d","Princeton Orange":"f07d25"}
+
+/* Extended Array */
+[{"name":"Magic Mint","hex":"b2f2da","rgb":[178,242,218],"cmyk":[26,0,10,5],"hsb":[158,26,95],"hsl":[158,71,82],"lab":[91,-25,5]},{"name":"Polished Pine","hex":"56a490","rgb":[86,164,144],"cmyk":[48,0,12,36],"hsb":[165,48,64],"hsl":[165,31,49],"lab":[62,-29,3]},{"name":"Deep Saffron","hex":"fba33d","rgb":[251,163,61],"cmyk":[0,35,76,2],"hsb":[32,76,98],"hsl":[32,96,61],"lab":[74,25,63]},{"name":"Princeton Orange","hex":"f07d25","rgb":[240,125,37],"cmyk":[0,48,85,6],"hsb":[26,85,94],"hsl":[26,87,54],"lab":[64,39,63]}]

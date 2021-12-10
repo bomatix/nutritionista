@@ -1,31 +1,36 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { View, Text, TextInput, FlatList, StyleSheet } from 'react-native'
+import { useRecoilState } from 'recoil'
 import { FoodComponent } from '../../models/FoodComponent'
 import { Color, Container, FontSize, Padding } from '../../utils/Consts'
 import { GSTYLE_SCREEN_CONTAINER } from '../../utils/GlobalStyles'
+import { foodComponentsList } from './globalStates'
 
 const AllFoodComponents = () => {
 
-    const [foodComponents, setFoodComponents] = useState<FoodComponent[]>([]);
+    const [foodComponents, setFoodComponents] = useRecoilState<FoodComponent[]>(foodComponentsList);
 
     const loadData = useCallback(async () => {
         setFoodComponents(await FoodComponent.getAll());
         console.log(foodComponents);
     }, []);
 
+    /**
+     * TODO: reload data only when needed.
+     */
     useEffect(() => {
         loadData();
-    }, [foodComponents]);
+    }, []);
 
     return (
-        <View style = {GSTYLE_SCREEN_CONTAINER}>
+        <View style = {[GSTYLE_SCREEN_CONTAINER]}>
             <TextInput 
                 style = {styles.searchBar}
                 placeholder = 'Search...'/>
             {/* <FlatList/> */}
             {foodComponents.map(item => (
                 <Text
-                    style={{paddingVertical: 10}}>{item.name}</Text>
+                    style={{paddingVertical: 10}}>{item.name} {item.kcal}</Text>
             ))}
         </View>
     )

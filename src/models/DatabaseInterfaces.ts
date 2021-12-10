@@ -1,16 +1,17 @@
-export interface FoodComponentWithoutNutritionDataDBRow {
+export interface FoodComponentDBRow {
     id: number;
     name: string;
-    is_complex: boolean;
-}
-
-export interface NutritionDataDBRow {
     kcal: number;
     carbs: number;
     protein:number;
     fat:number;
-    food_component_id:number;
+    is_complex: boolean;
+    are_macronutrients_calculated: boolean;
 }
 
-export interface FoodComponentDBRow extends FoodComponentWithoutNutritionDataDBRow, NutritionDataDBRow {
+export interface QuantityDBRow {
+    id: number;
+    quantity_name: string;
+    grams: number;
+    food_component_id: number;
 }
